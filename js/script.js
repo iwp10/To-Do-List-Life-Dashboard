@@ -153,6 +153,172 @@ function initTimer() {
 
 
 // =============================================
+// TODO LIST
+// =============================================
+
+// In-memory task array — each task: { id, text, completed }
+let tasks = [];
+
+// Builds and renders the full task list into #task-list
+function renderTasks() {
+  const taskList = document.querySelector('#task-list');
+  taskList.innerHTML = '';
+
+  if (tasks.length === 0) {
+    const empty = document.createElement('li');
+    empty.className = 'empty-state';
+    empty.textContent = 'No tasks yet. Add one above!';
+    taskList.appendChild(empty);
+    return;
+  }
+
+  tasks.forEach(function (task) {
+    // --- List item ---
+    const li = document.createElement('li');
+    li.className = 'task-item' + (task.completed ? ' done' : '');
+    li.dataset.id = task.id;
+
+    // --- Checkbox ---
+    const checkbox = document.createElement('input');
+    checkbox.type      = 'checkbox';
+    checkbox.className = 'task-checkbox';
+    checkbox.checked   = task.completed;
+    checkbox.setAttribute('aria-label', 'Mark task as completed');
+    checkbox.addEventListener('change', function () {
+      toggleTask(task.id);
+    });
+
+    // --- Label ---
+    const label = document.createElement('span');
+    label.className   = 'task-label';
+    label.textContent = task.text;
+
+    // --- Action buttons wrapper ---
+    const actions = document.createElement('div');
+    actions.className = 'task-actions';
+
+    // Edit button
+    const editBtn = document.createElement('button');
+    editBtn.className   = 'btn btn-ghost';
+    editBtn.textContent = 'Edit';
+    editBtn.setAttribute('aria-label', 'Edit task');
+    editBtn.addEventListener('click', function () {
+      editTask(task.id, li, label);
+    });
+
+    // Delete button
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className   = 'btn btn-ghost';
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.setAttribute('aria-label', 'Delete task');
+    deleteBtn.style.color = 'var(--color-danger)';
+    deleteBtn.addEventListener('click', function () {
+      deleteTask(task.id);
+    });
+
+    actions.appendChild(editBtn);
+    actions.appendChild(deleteBtn);
+
+    li.appendChild(checkbox);
+    li.appendChild(label);
+    li.appendChild(actions);
+    taskList.appendChild(li);
+  });
+}
+
+// Reads the input, creates a new task object, and re-renders the list
+function addTask() {
+  const taskInput = document.querySelector('#task-input');
+  const text      = taskInput.value.trim();
+
+  // Ignore empty or whitespace-only input
+  if (text === '') return;
+
+  const newTask = {
+    id:        Date.now(),
+    text:      text,
+    completed: false,
+  };
+
+  tasks.push(newTask);
+  taskInput.value = '';
+  renderTasks();
+}
+
+// Replaces the task label with an inline input field for editing
+function editTask(id, li, label) {
+  // Prevent opening a second edit field if one is already open
+  if (li.querySelector('.edit-input')) return;
+
+  const task = tasks.find(function (t) { return t.id === id; });
+  if (!task) return;
+
+  // Create inline edit input
+  const editInput = document.createElement('input');
+  editInput.type      = 'text';
+  editInput.value     = task.text;
+  editInput.className = 'task-input edit-input';
+  editInput.setAttribute('aria-label', 'Edit task text');
+
+  // Replace the label with the edit input
+  li.replaceChild(editInput, label);
+  editInput.focus();
+  editInput.select();
+
+  // Saves the edited text and restores the label
+  function saveEdit() {
+    const newText = editInput.value.trim();
+
+    if (newText !== '' && newText !== task.text) {
+      task.text = newText;
+    }
+
+    renderTasks();
+  }
+
+  // Save on Enter key
+  editInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') saveEdit();
+    if (e.key === 'Escape') renderTasks(); // cancel edit
+  });
+
+  // Save on blur (clicking away)
+  editInput.addEventListener('blur', saveEdit);
+}
+
+// Toggles the completed state of a task by its id
+function toggleTask(id) {
+  const task = tasks.find(function (t) { return t.id === id; });
+  if (!task) return;
+
+  task.completed = !task.completed;
+  renderTasks();
+}
+
+// Removes a task from the array by its id and re-renders the list
+function deleteTask(id) {
+  tasks = tasks.filter(function (t) { return t.id !== id; });
+  renderTasks();
+}
+
+// Wires up the Add button and Enter key for the task input
+function initTodo() {
+  const addBtn    = document.querySelector('#add-task-btn');
+  const taskInput = document.querySelector('#task-input');
+
+  addBtn.addEventListener('click', addTask);
+
+  // Allow pressing Enter to add a task
+  taskInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') addTask();
+  });
+
+  // Render the initial empty state
+  renderTasks();
+}
+
+
+// =============================================
 // INIT — runs when the page is fully loaded
 // =============================================
 
@@ -162,6 +328,7 @@ function init() {
   updateDate();
   updateGreeting();
   initTimer();
+  initTodo();
 }
 
 document.addEventListener('DOMContentLoaded', init);
