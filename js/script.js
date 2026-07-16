@@ -342,6 +342,117 @@ function initTodo() {
 
 
 // =============================================
+// QUICK LINKS
+// =============================================
+
+// In-memory links array — each link: { id, name, url }
+let links = [];
+
+// Ensures a URL starts with http:// or https://, prepending https:// if not
+function normaliseUrl(url) {
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  return 'https://' + url;
+}
+
+// Builds and renders all link chips into #links-container
+function renderLinks() {
+  const container = document.querySelector('#links-container');
+  container.innerHTML = '';
+
+  if (links.length === 0) {
+    const empty = document.createElement('p');
+    empty.className   = 'empty-state';
+    empty.textContent = 'No links saved yet. Add one above!';
+    container.appendChild(empty);
+    return;
+  }
+
+  links.forEach(function (link) {
+    // --- Chip wrapper ---
+    const chip = document.createElement('div');
+    chip.className = 'link-chip';
+
+    // --- Link name button — opens the URL in a new tab ---
+    const nameBtn = document.createElement('button');
+    nameBtn.className   = 'link-chip-name';
+    nameBtn.textContent = link.name;
+    nameBtn.setAttribute('aria-label', 'Open ' + link.name);
+    nameBtn.addEventListener('click', function () {
+      window.open(link.url, '_blank');
+    });
+
+    // --- Delete button ---
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className   = 'link-chip-delete';
+    deleteBtn.textContent = '✕';
+    deleteBtn.setAttribute('aria-label', 'Delete ' + link.name);
+    deleteBtn.addEventListener('click', function () {
+      deleteLink(link.id);
+    });
+
+    chip.appendChild(nameBtn);
+    chip.appendChild(deleteBtn);
+    container.appendChild(chip);
+  });
+}
+
+// Reads the name and URL inputs, validates them, and adds a new link
+function addLink() {
+  const nameInput = document.querySelector('#link-name');
+  const urlInput  = document.querySelector('#link-url');
+
+  const name = nameInput.value.trim();
+  const url  = urlInput.value.trim();
+
+  // Ignore empty or whitespace-only input in either field
+  if (name === '' || url === '') return;
+
+  const newLink = {
+    id:   Date.now(),
+    name: name,
+    url:  normaliseUrl(url),
+  };
+
+  links.push(newLink);
+
+  // Clear both inputs after a successful add
+  nameInput.value = '';
+  urlInput.value  = '';
+
+  renderLinks();
+}
+
+// Removes a link from the array by its id and re-renders
+function deleteLink(id) {
+  links = links.filter(function (l) { return l.id !== id; });
+  renderLinks();
+}
+
+// Wires up the Add button and Enter key on both link inputs
+function initLinks() {
+  const addBtn    = document.querySelector('#add-link-btn');
+  const nameInput = document.querySelector('#link-name');
+  const urlInput  = document.querySelector('#link-url');
+
+  addBtn.addEventListener('click', addLink);
+
+  // Allow pressing Enter from either input field to add the link
+  nameInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') addLink();
+  });
+
+  urlInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') addLink();
+  });
+
+  // Render the initial empty state
+  renderLinks();
+}
+
+
+// =============================================
 // INIT — runs when the page is fully loaded
 // =============================================
 
@@ -352,6 +463,7 @@ function init() {
   updateGreeting();
   initTimer();
   initTodo();
+  initLinks();
 }
 
 document.addEventListener('DOMContentLoaded', init);

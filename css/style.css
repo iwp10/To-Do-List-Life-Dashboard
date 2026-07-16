@@ -501,6 +501,17 @@ input {
   box-shadow: var(--shadow-btn);
 }
 
+/* Name button inside a link chip — inherits chip styles, no default button appearance */
+.link-chip-name {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  padding: 0;
+  cursor: pointer;
+}
+
 .link-chip-delete {
   background: none;
   border: none;
