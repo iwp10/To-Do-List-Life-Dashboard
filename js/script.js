@@ -26,6 +26,30 @@ function startClock() {
 
 
 // =============================================
+// GREETING
+// =============================================
+
+// Determines the greeting based on the current hour and updates #greeting-text
+// 05:00–11:59 → Good Morning | 12:00–17:59 → Good Afternoon | 18:00–04:59 → Good Evening
+function updateGreeting() {
+  const hour = new Date().getHours();
+
+  let greeting;
+
+  if (hour >= 5 && hour < 12) {
+    greeting = 'Good Morning!';
+  } else if (hour >= 12 && hour < 18) {
+    greeting = 'Good Afternoon!';
+  } else {
+    greeting = 'Good Evening!';
+  }
+
+  const greetingEl = document.querySelector('#greeting-text');
+  greetingEl.textContent = greeting;
+}
+
+
+// =============================================
 // DATE
 // =============================================
 
@@ -54,6 +78,7 @@ function updateDate() {
 function init() {
   startClock();
   updateDate();
+  updateGreeting();
 }
 
 document.addEventListener('DOMContentLoaded', init);
