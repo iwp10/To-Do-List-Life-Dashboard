@@ -159,6 +159,24 @@ function initTimer() {
 // In-memory task array — each task: { id, text, completed }
 let tasks = [];
 
+// Saves the current tasks array to Local Storage as a JSON string
+function saveTasks() {
+  localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+
+// Loads tasks from Local Storage and returns a valid array.
+// Returns an empty array if no data exists or if the data is corrupted.
+function loadTasks() {
+  try {
+    const stored = localStorage.getItem('tasks');
+    const parsed = JSON.parse(stored);
+    // Confirm the parsed value is actually an array before using it
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    return [];
+  }
+}
+
 // Builds and renders the full task list into #task-list
 function renderTasks() {
   const taskList = document.querySelector('#task-list');
@@ -242,6 +260,7 @@ function addTask() {
 
   tasks.push(newTask);
   taskInput.value = '';
+  saveTasks();
   renderTasks();
 }
 
@@ -273,6 +292,7 @@ function editTask(id, li, label) {
       task.text = newText;
     }
 
+    saveTasks();
     renderTasks();
   }
 
@@ -292,12 +312,14 @@ function toggleTask(id) {
   if (!task) return;
 
   task.completed = !task.completed;
+  saveTasks();
   renderTasks();
 }
 
 // Removes a task from the array by its id and re-renders the list
 function deleteTask(id) {
   tasks = tasks.filter(function (t) { return t.id !== id; });
+  saveTasks();
   renderTasks();
 }
 
@@ -313,7 +335,8 @@ function initTodo() {
     if (e.key === 'Enter') addTask();
   });
 
-  // Render the initial empty state
+  // Load saved tasks from Local Storage before first render
+  tasks = loadTasks();
   renderTasks();
 }
 
