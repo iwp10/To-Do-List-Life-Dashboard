@@ -71,6 +71,88 @@ function updateDate() {
 
 
 // =============================================
+// FOCUS TIMER
+// =============================================
+
+// Timer state
+const TIMER_DURATION = 25 * 60; // 25 minutes in seconds
+let remainingSeconds = TIMER_DURATION;
+let intervalId       = null;
+let isRunning        = false;
+
+// Converts remainingSeconds to MM:SS and writes it to #timer-display
+function renderTimer() {
+  const minutes = String(Math.floor(remainingSeconds / 60)).padStart(2, '0');
+  const seconds = String(remainingSeconds % 60).padStart(2, '0');
+
+  const timerDisplay = document.querySelector('#timer-display');
+  timerDisplay.textContent = `${minutes}:${seconds}`;
+}
+
+// Updates the disabled state of Start, Stop, and Reset buttons
+function updateTimerButtons() {
+  const startBtn = document.querySelector('#start-btn');
+  const stopBtn  = document.querySelector('#stop-btn');
+  const resetBtn = document.querySelector('#reset-btn');
+
+  startBtn.disabled = isRunning;
+  stopBtn.disabled  = !isRunning;
+  resetBtn.disabled = false;
+}
+
+// Starts the countdown — guards against multiple intervals if called repeatedly
+function startTimer() {
+  if (isRunning) return;
+
+  isRunning  = true;
+  updateTimerButtons();
+
+  intervalId = setInterval(function () {
+    remainingSeconds--;
+    renderTimer();
+
+    // Stop automatically when the timer reaches zero
+    if (remainingSeconds <= 0) {
+      stopTimer();
+    }
+  }, 1000);
+}
+
+// Pauses the countdown without resetting the remaining time
+function stopTimer() {
+  clearInterval(intervalId);
+  intervalId = null;
+  isRunning  = false;
+  updateTimerButtons();
+}
+
+// Resets the timer back to 25:00 and stops any active countdown
+function resetTimer() {
+  clearInterval(intervalId);
+  intervalId       = null;
+  isRunning        = false;
+  remainingSeconds = TIMER_DURATION;
+  renderTimer();
+  updateTimerButtons();
+}
+
+// Wires up timer buttons and sets the initial display
+function initTimer() {
+  const startBtn = document.querySelector('#start-btn');
+  const stopBtn  = document.querySelector('#stop-btn');
+  const resetBtn = document.querySelector('#reset-btn');
+
+  startBtn.addEventListener('click', startTimer);
+  stopBtn.addEventListener('click', stopTimer);
+  resetBtn.addEventListener('click', resetTimer);
+
+  // Show 25:00 on load and set correct initial button states
+  renderTimer();
+  updateTimerButtons();
+}
+
+
+// =============================================
 // INIT — runs when the page is fully loaded
 // =============================================
 
@@ -79,6 +161,7 @@ function init() {
   startClock();
   updateDate();
   updateGreeting();
+  initTimer();
 }
 
 document.addEventListener('DOMContentLoaded', init);
