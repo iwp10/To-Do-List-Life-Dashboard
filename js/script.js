@@ -4,6 +4,23 @@
 
 
 // =============================================
+// STORAGE HELPERS
+// =============================================
+
+// Reads a JSON array from Local Storage by key.
+// Returns an empty array if the key is missing or the data is corrupted.
+function loadFromStorage(key) {
+  try {
+    const stored = localStorage.getItem(key);
+    const parsed = JSON.parse(stored);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+
+// =============================================
 // CLOCK
 // =============================================
 
@@ -171,14 +188,7 @@ function saveTasks() {
 // Loads tasks from Local Storage and returns a valid array.
 // Returns an empty array if no data exists or if the data is corrupted.
 function loadTasks() {
-  try {
-    const stored = localStorage.getItem('tasks');
-    const parsed = JSON.parse(stored);
-    // Confirm the parsed value is actually an array before using it
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (e) {
-    return [];
-  }
+  return loadFromStorage('tasks');
 }
 
 // Builds and renders the full task list into #task-list
@@ -301,8 +311,13 @@ function editTask(id, li, label) {
   editInput.focus();
   editInput.select();
 
-  // Saves the edited text and restores the label
+  // Saves the edited text and restores the label.
+  // The 'called' flag prevents a double-save when Enter fires blur immediately after.
+  let called = false;
   function saveEdit() {
+    if (called) return;
+    called = true;
+
     const newText = editInput.value.trim();
 
     if (newText !== '' && newText !== task.text) {
@@ -373,14 +388,7 @@ function saveLinks() {
 // Loads links from Local Storage and returns a valid array.
 // Returns an empty array if no data exists or if the data is corrupted.
 function loadLinks() {
-  try {
-    const stored = localStorage.getItem('quickLinks');
-    const parsed = JSON.parse(stored);
-    // Confirm the parsed value is actually an array before using it
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (e) {
-    return [];
-  }
+  return loadFromStorage('quickLinks');
 }
 
 // Ensures a URL starts with http:// or https://, prepending https:// if not
