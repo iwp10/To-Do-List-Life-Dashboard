@@ -474,11 +474,53 @@ function initLinks() {
 
 
 // =============================================
+// THEME (LIGHT / DARK MODE)
+// =============================================
+
+// Saves the current theme to Local Storage
+function saveTheme(theme) {
+  localStorage.setItem('theme', theme);
+}
+
+// Reads the saved theme from Local Storage and applies it.
+// Defaults to light mode if no preference is saved.
+function loadTheme() {
+  const saved = localStorage.getItem('theme');
+  const toggleBtn = document.querySelector('#theme-toggle');
+
+  if (saved === 'dark') {
+    document.body.classList.add('dark-mode');
+    toggleBtn.textContent = '☀️';
+  } else {
+    document.body.classList.remove('dark-mode');
+    toggleBtn.textContent = '🌙';
+  }
+}
+
+// Toggles between light and dark mode and saves the new preference
+function toggleTheme() {
+  const isDark    = document.body.classList.toggle('dark-mode');
+  const toggleBtn = document.querySelector('#theme-toggle');
+
+  toggleBtn.textContent = isDark ? '☀️' : '🌙';
+  saveTheme(isDark ? 'dark' : 'light');
+}
+
+// Wires up the theme toggle button and restores the saved theme on load
+function initTheme() {
+  const toggleBtn = document.querySelector('#theme-toggle');
+  toggleBtn.addEventListener('click', toggleTheme);
+  loadTheme();
+}
+
+
+// =============================================
 // INIT — runs when the page is fully loaded
 // =============================================
 
 // Entry point: initialises all features in order
 function init() {
+  initTheme();
   startClock();
   updateDate();
   updateGreeting();

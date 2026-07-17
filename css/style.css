@@ -91,10 +91,10 @@
 
 /* =============================================
    2. DARK THEME VARIABLE OVERRIDES
-   (Applied via body.dark — ready for Milestone 9)
+   (Applied via body.dark-mode — toggled by JS)
    ============================================= */
 
-body.dark {
+body.dark-mode {
   --color-bg:           #13151a;
   --color-surface:      #1e2130;
   --color-surface-alt:  #252a3a;
