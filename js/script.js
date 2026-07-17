@@ -248,6 +248,13 @@ function renderTasks() {
   });
 }
 
+// Returns true if a task with the same text already exists (case-insensitive)
+function isDuplicateTask(text) {
+  return tasks.some(function (t) {
+    return t.text.toLowerCase() === text.toLowerCase();
+  });
+}
+
 // Reads the input, creates a new task object, and re-renders the list
 function addTask() {
   const taskInput = document.querySelector('#task-input');
@@ -255,6 +262,12 @@ function addTask() {
 
   // Ignore empty or whitespace-only input
   if (text === '') return;
+
+  // Reject duplicate tasks (case-insensitive comparison)
+  if (isDuplicateTask(text)) {
+    alert(`"${text}" is already in your task list.`);
+    return;
+  }
 
   const newTask = {
     id:        Date.now(),
